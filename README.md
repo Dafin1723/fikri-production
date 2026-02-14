@@ -52,152 +52,471 @@ fikri_production/
         └── dashboard.html      # Dashboard admin
 ```
 
-## 🚀 Cara Instalasi & Menjalankan
+# 🚀 Panduan Deploy Fikri Production ke Server Beneran
 
-### 1. Install Dependencies
+## 📋 Persiapan
 
-```bash
-pip install -r requirements.txt
-```
+### Yang Sudah Beres di VM (Tinggal Copy):
+- ✅ Flask app (`fikri-production`)
+- ✅ Virtual environment (`venv`)
+- ✅ Systemd service (`fikri-production.service`)
+- ✅ Nginx config
+- ✅ Database SQLite (`database.db`)
 
-### 2. Jalankan Aplikasi
-
-```bash
-python app.py
-```
-
-### 3. Akses di Browser
-
-- **User Interface**: http://127.0.0.1:5000/
-- **Admin Login**: http://127.0.0.1:5000/admin/login
-
-### 4. Login Admin
-
-```
-Username: admin
-Password: unitproduksi123
-```
-
-## 📊 Database Schema
-
-### Model: Pesanan
-
-| Field        | Type      | Description                    |
-|--------------|-----------|--------------------------------|
-| id           | Integer   | Primary key (auto-increment)   |
-| nama         | String    | Nama pemesan                   |
-| kontak       | String    | Email/WhatsApp                 |
-| jenis_print  | String    | Jenis print/produk             |
-| ukuran       | String    | Ukuran kertas/produk           |
-| jumlah       | Integer   | Jumlah copies                  |
-| file_path    | String    | Path file upload               |
-| status       | String    | pending/proses/selesai         |
-| created_at   | DateTime  | Timestamp pemesanan            |
-
-## 🎨 Design System
-
-### Color Palette
-- **Primary Orange**: `#FF8C42`
-- **Secondary Peach**: `#FFE5D9`
-- **Dark Blue**: `#0047FF`
-- **Success Green**: `#28a745`
-- **Warning Yellow**: `#ffc107`
-- **Danger Red**: `#dc3545`
-
-### Typography
-- **Font Family**: Inter, Segoe UI, Tahoma, Geneva, Verdana, sans-serif
-
-## 📝 User Flow
-
-### Alur Pemesanan (User)
-1. User membuka landing page → melihat katalog
-2. Klik "Order Now" → Form pemesanan
-3. Isi data (Nama, Kontak, Jenis Print, Ukuran, Jumlah)
-4. Upload file desain → Preview otomatis
-5. Submit → Mendapat nomor pesanan
-6. Cek status dengan nomor pesanan
-
-### Alur Management (Admin)
-1. Login di `/admin/login`
-2. Dashboard menampilkan statistik real-time
-3. Filter pesanan by status atau search
-4. Update status pesanan (Pending → Proses → Selesai)
-5. Download file pesanan
-6. Export data ke Excel/PDF
-
-## 🔒 Security Notes
-
-⚠️ **PENTING**: Sebelum deploy ke production:
-
-1. **Ganti Secret Key**:
-   ```python
-   app.secret_key = os.urandom(24)  # Generate random key
-   ```
-
-2. **Ganti Password Admin**:
-   - Implementasi hash password (bcrypt)
-   - Jangan hardcode credentials
-
-3. **Validasi File Upload**:
-   - Sudah ada validasi extension
-   - Tambahkan validasi size & content type
-
-4. **HTTPS**: Deploy dengan HTTPS di production
-
-## 🌐 API Endpoints
-
-### Public Routes
-- `GET /` - Redirect ke produk
-- `GET /produk` - Landing page & katalog
-- `GET/POST /pesan` - Form pemesanan
-- `GET/POST /cek-status` - Cek status pesanan
-
-### Admin Routes (Protected)
-- `GET/POST /admin/login` - Login admin
-- `GET /admin/logout` - Logout admin
-- `GET /admin` - Dashboard (dengan filter & search)
-- `POST /update/<id>` - Update status pesanan
-- `GET /download/<filename>` - Download file
-- `GET /admin/export/excel` - Export ke Excel
-- `GET /admin/export/pdf` - Export ke PDF
-- `GET /admin/api/stats` - API statistik (JSON)
-
-## 👥 Tim Pengembang
-
-**THE FOOL Team** - Pembagian Tugas:
-- **Dafin**: Struktur awal, config, routing, file upload/download, session
-- **Amru**: Database model, inisialisasi database, template produk
-- **Fikri**: Admin routes, login/logout, dashboard, update status, flash messages
-
-## 📱 Responsive Design
-
-- ✅ Desktop (1920px+)
-- ✅ Tablet (768px - 1024px)
-- ✅ Mobile (< 768px)
-
-## 🐛 Troubleshooting
-
-### Database tidak terbuat?
-```bash
-# Di Python shell:
-from app import app, db
-with app.app_context():
-    db.create_all()
-```
-
-### Error import pandas/reportlab?
-```bash
-pip install pandas openpyxl reportlab --break-system-packages
-```
-
-### File upload tidak berfungsi?
-- Cek folder `uploads/` sudah ada
-- Cek permission folder (chmod 755)
-
-## 📄 License
-
-© 2025 Fikri Production - SMKIT Ihsanul Fikri Mungkid
+### Yang Perlu Disiapkan di Server Baru:
+- [ ] Server Debian/Ubuntu dengan IP publik
+- [ ] Domain (opsional, bisa pakai Ngrok dulu)
+- [ ] Akses SSH ke server
 
 ---
 
-**Catatan**: Ini adalah project tugas sekolah untuk Unit Produksi. Untuk penggunaan production, pastikan implementasi security yang lebih robust.
+## 🔄 Transfer Project dari VM ke Server
+
+### Method 1: Pakai Git (Recommended)
+
+**Di VM:**
+```bash
+cd /home/fikri/apps/fikri-production
+
+# Init git
+git init
+git add .
+git commit -m "Initial commit"
+
+# Push ke GitHub
+git remote add origin https://github.com/USERNAME/fikri-production.git
+git branch -M main
+git push -u origin main
+```
+
+**Di Server Baru:**
+```bash
+git clone https://github.com/USERNAME/fikri-production.git
+cd fikri-production
+```
+
+### Method 2: Pakai SCP
+
+**Di komputer lokal (bukan di VM):**
+```bash
+# Compress project
+cd /home/fikri/apps
+tar -czf fikri-production.tar.gz fikri-production/
+
+# Upload ke server
+scp fikri-production.tar.gz user@SERVER-IP:~/
+
+# Di server, extract:
+tar -xzf fikri-production.tar.gz
+```
+
+---
+
+## ⚙️ Setup di Server Baru (Step-by-Step)
+
+### 1. Update Sistem
+
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+### 2. Install Dependencies
+
+```bash
+sudo apt install -y \
+    python3 python3-pip python3-venv \
+    nginx supervisor git curl wget ufw
+```
+
+### 3. Setup Project
+
+```bash
+# Buat user
+sudo adduser fikri
+sudo usermod -aG sudo fikri
+su - fikri
+
+# Copy project ke home
+cd ~/apps/fikri-production
+
+# Setup virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+pip install gunicorn
+
+# Test run
+python app.py
+# Kalau OK, Ctrl+C untuk stop
+```
+
+### 4. Setup Gunicorn Service
+
+```bash
+sudo nano /etc/systemd/system/fikri-production.service
+```
+
+**Paste config (sesuaikan path!):**
+
+```ini
+[Unit]
+Description=Fikri Production Flask App
+After=network.target
+
+[Service]
+User=fikri
+Group=fikri
+WorkingDirectory=/home/fikri/apps/fikri-production
+Environment="PATH=/home/fikri/apps/fikri-production/venv/bin"
+
+ExecStart=/home/fikri/apps/fikri-production/venv/bin/gunicorn \
+    --workers 3 \
+    --bind 127.0.0.1:8000 \
+    --timeout 120 \
+    --log-level info \
+    app:app
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+# Start service
+sudo systemctl daemon-reload
+sudo systemctl enable fikri-production
+sudo systemctl start fikri-production
+sudo systemctl status fikri-production
+```
+
+### 5. Setup Nginx
+
+```bash
+sudo nano /etc/nginx/sites-available/fikri-production
+```
+
+**Config Nginx:**
+
+```nginx
+server {
+    listen 80;
+    server_name IP-SERVER-KAMU;  # Ganti dengan IP atau domain
+    
+    client_max_body_size 20M;
+
+    location /static/ {
+        alias /home/fikri/apps/fikri-production/static/;
+        expires 30d;
+        access_log off;
+    }
+
+    location /uploads/ {
+        alias /home/fikri/apps/fikri-production/uploads/;
+        expires 7d;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        
+        proxy_connect_timeout 120;
+        proxy_send_timeout 120;
+        proxy_read_timeout 120;
+    }
+}
+```
+
+```bash
+# Enable site
+sudo ln -s /etc/nginx/sites-available/fikri-production /etc/nginx/sites-enabled/
+sudo rm /etc/nginx/sites-enabled/default
+
+# Test & restart
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+### 6. Setup Firewall
+
+```bash
+sudo ufw enable
+sudo ufw allow 22/tcp   # SSH
+sudo ufw allow 80/tcp   # HTTP
+sudo ufw allow 443/tcp  # HTTPS
+sudo ufw status
+```
+
+### 7. Fix Permissions
+
+```bash
+sudo chmod 755 /home/fikri
+sudo chmod 755 /home/fikri/apps
+sudo chmod -R 755 /home/fikri/apps/fikri-production
+sudo chown -R fikri:www-data /home/fikri/apps/fikri-production
+```
+
+---
+
+## 🌐 Deploy ke Internet (Pilih Salah Satu)
+
+### Option 1: Pakai Ngrok (Termudah)
+
+```bash
+# Install ngrok
+wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+tar -xzf ngrok-v3-stable-linux-amd64.tgz
+sudo mv ngrok /usr/local/bin/
+
+# Add authtoken (dari ngrok.com)
+ngrok config add-authtoken YOUR-TOKEN
+
+# Run dengan screen (agar tetap jalan)
+apt install screen -y
+screen -S ngrok
+ngrok http 8000
+
+# Detach: Ctrl+A lalu D
+# Reattach: screen -r ngrok
+```
+
+**Atau buat service:**
+
+```bash
+sudo nano /etc/systemd/system/ngrok.service
+```
+
+```ini
+[Unit]
+Description=Ngrok Tunnel
+After=network.target fikri-production.service
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/ngrok http 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable ngrok
+sudo systemctl start ngrok
+```
+
+### Option 2: Port Forwarding + DuckDNS (Gratis, Butuh IP Publik)
+
+**Setup DuckDNS:**
+
+```bash
+mkdir ~/duckdns
+cd ~/duckdns
+nano duck.sh
+```
+
+```bash
+#!/bin/bash
+echo url="https://www.duckdns.org/update?domains=SUBDOMAIN&token=TOKEN&ip=" | curl -k -o ~/duckdns/duck.log -K -
+```
+
+```bash
+chmod 700 duck.sh
+./duck.sh
+cat duck.log  # Harus: OK
+
+# Auto update
+crontab -e
+# Tambahkan:
+*/5 * * * * ~/duckdns/duck.sh >/dev/null 2>&1
+```
+
+**Setup port forwarding di router:**
+- Port 80 → IP-SERVER:80
+- Port 443 → IP-SERVER:443
+
+**Install SSL:**
+
+```bash
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d subdomain.duckdns.org
+```
+
+### Option 3: VPS Cloud (Production)
+
+Deploy ke VPS (DigitalOcean/Vultr/Contabo):
+- Ikuti semua step 1-7 di atas
+- Tidak perlu port forwarding (VPS punya IP publik langsung)
+- Setup domain → point ke IP VPS
+- Install SSL dengan certbot
+
+---
+
+## 🔒 Security Checklist
+
+Sebelum production:
+
+```bash
+# 1. Ganti secret key di app.py
+nano app.py
+# Ubah: app.secret_key = os.urandom(24).hex()
+
+# 2. Ganti password admin
+# Di app.py, route /admin/login, ubah password
+
+# 3. Install fail2ban
+sudo apt install fail2ban -y
+sudo systemctl enable fail2ban
+
+# 4. Setup auto backup
+nano ~/backup-db.sh
+```
+
+```bash
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/home/fikri/backups"
+mkdir -p $BACKUP_DIR
+cp /home/fikri/apps/fikri-production/database.db \
+   $BACKUP_DIR/database_$DATE.db
+find $BACKUP_DIR -name "database_*.db" -mtime +7 -delete
+```
+
+```bash
+chmod +x ~/backup-db.sh
+crontab -e
+# Tambahkan:
+0 2 * * * /home/fikri/backup-db.sh
+```
+
+---
+
+## 📊 Monitoring
+
+```bash
+# Check services
+sudo systemctl status fikri-production
+sudo systemctl status nginx
+
+# View logs
+sudo journalctl -u fikri-production -f
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
+
+# Resource usage
+htop
+df -h
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Website tidak muncul:
+```bash
+# Check Gunicorn
+sudo systemctl status fikri-production
+curl http://localhost:8000
+
+# Check Nginx
+sudo systemctl status nginx
+sudo nginx -t
+```
+
+### CSS tidak load (403 Forbidden):
+```bash
+sudo chmod 755 /home/fikri
+sudo chmod -R 755 /home/fikri/apps/fikri-production
+sudo chown -R fikri:www-data /home/fikri/apps/fikri-production
+sudo systemctl restart nginx
+```
+
+### 502 Bad Gateway:
+```bash
+# Restart services
+sudo systemctl restart fikri-production
+sudo systemctl restart nginx
+
+# Check logs
+sudo journalctl -u fikri-production -n 50
+```
+
+---
+
+## 📁 File yang Perlu Dibawa dari VM
+
+```
+/home/fikri/apps/fikri-production/
+├── app.py                          # Main application
+├── requirements.txt                # Dependencies
+├── database.db                     # Database (atau buat baru)
+├── static/                         # CSS, JS
+├── templates/                      # HTML templates
+├── uploads/                        # Upload folder (buat baru)
+└── venv/                          # Skip, install ulang di server
+```
+
+**File config system:**
+```
+/etc/systemd/system/fikri-production.service
+/etc/nginx/sites-available/fikri-production
+```
+
+---
+
+## ⏱️ Estimasi Waktu Setup
+
+- Setup dasar server: **15 menit**
+- Transfer & install project: **10 menit**
+- Configure Nginx + Service: **10 menit**
+- Setup Ngrok/SSL: **10 menit**
+- Testing & debug: **15 menit**
+
+**Total: ~1 jam** (kalau smooth)
+
+---
+
+## 🎯 Quick Commands Cheat Sheet
+
+```bash
+# Restart app
+sudo systemctl restart fikri-production
+
+# Restart Nginx
+sudo systemctl restart nginx
+
+# Check logs
+sudo journalctl -u fikri-production -f
+
+# Update code
+cd ~/apps/fikri-production
+git pull
+sudo systemctl restart fikri-production
+
+# Backup database
+cp database.db database.db.backup
+
+# Test local
+curl http://localhost:8000
+```
+
+---
+
+## 📞 Kontak Jika Ada Masalah
+
+Kalau besok ada stuck, inget:
+1. Check service status dulu
+2. Check logs untuk error
+3. Google error message
+4. Atau tanya lagi! 😊
+
+---
+
+**Good luck untuk deploy besok!** 🚀
+
+Tips: Screenshot semua step yang berhasil di VM, biar besok tinggal ikutin! 📸
