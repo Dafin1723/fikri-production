@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Fikri Production</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="background: linear-gradient(135deg, #FFE5D9 0%, #FFF5F0 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Decorative Circles -->
+    <div style="position: fixed; top: -150px; left: -150px; width: 400px; height: 400px; background: rgba(255, 140, 66, 0.1); border-radius: 50%; z-index: 0;"></div>
+    <div style="position: fixed; bottom: -100px; right: -100px; width: 350px; height: 350px; background: rgba(0, 71, 255, 0.1); border-radius: 50%; z-index: 0;"></div>
+
+    <!-- Login Card -->
+    <div style="position: relative; z-index: 1; width: 100%; max-width: 450px; margin: 2rem;">
+        <!-- Logo -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <a href="{{ url_for('produk') }}" style="display: inline-flex; align-items: center; gap: 0.8rem; text-decoration: none; color: #2C2C2C;">
+                <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
+                    <path d="M20 20L50 10L80 20L50 90L20 20Z" fill="#FF8C42"/>
+                    <path d="M50 10L80 20L50 50L20 20L50 10Z" fill="#0047FF"/>
+                </svg>
+                <span style="font-size: 1.5rem; font-weight: 700;">FIKRI PRODUCTION</span>
+            </a>
+        </div>
+
+        <!-- Login Form Card -->
+        <div style="background: white; padding: 3rem; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <h1 style="text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; color: #2C2C2C;">Welcome Admin</h1>
+            <p style="text-align: center; color: #6C6C6C; margin-bottom: 2.5rem;">We missed you! Please enter your username and password</p>
+
+            <form method="POST">
+                <!-- Username -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #2C2C2C;">Username</label>
+                    <input 
+                        type="text" 
+                        name="username" 
+                        required
+                        placeholder="Enter your username"
+                        style="width: 100%; padding: 1rem; border: 2px solid #E0E0E0; border-radius: 12px; font-size: 1rem; transition: all 0.3s ease;"
+                        onfocus="this.style.borderColor='#0047FF'; this.style.boxShadow='0 0 0 3px rgba(0,71,255,0.1)'"
+                        onblur="this.style.borderColor='#E0E0E0'; this.style.boxShadow='none'"
+                    >
+                </div>
+
+                <!-- Password -->
+                <div style="margin-bottom: 2rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: #2C2C2C;">Password</label>
+                    <input 
+                        type="password" 
+                        name="password" 
+                        required
+                        placeholder="Enter your password"
+                        style="width: 100%; padding: 1rem; border: 2px solid #E0E0E0; border-radius: 12px; font-size: 1rem; transition: all 0.3s ease;"
+                        onfocus="this.style.borderColor='#0047FF'; this.style.boxShadow='0 0 0 3px rgba(0,71,255,0.1)'"
+                        onblur="this.style.borderColor='#E0E0E0'; this.style.boxShadow='none'"
+                    >
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    style="width: 100%; padding: 1.2rem; background: linear-gradient(135deg, #FF8C42 0%, #FF7020 100%); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(255,140,66,0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                >
+                    Login
+                </button>
+            </form>
+
+            <!-- Back to Home -->
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{{ url_for('produk') }}" style="color: #6C6C6C; text-decoration: none; font-size: 0.95rem; transition: color 0.3s ease;">
+                    ← Back to Home
+                </a>
+            </div>
+        </div>
+
+        
+    <script>
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+
+    <style>
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</body>
+</html>

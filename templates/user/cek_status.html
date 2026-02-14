@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Status Pesanan - Fikri Production</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="{{ url_for('produk') }}" class="logo">
+            <svg width="35" height="35" viewBox="0 0 100 100" fill="none">
+                <path d="M20 20L50 10L80 20L50 90L20 20Z" fill="#FF8C42"/>
+                <path d="M50 10L80 20L50 50L20 20L50 10Z" fill="#0047FF"/>
+            </svg>
+            <span>FIKRI PRODUCTION</span>
+        </a>
+        <div class="nav-buttons">
+            <a href="{{ url_for('pesan') }}" class="btn btn-outline">Pesan Baru</a>
+            <a href="{{ url_for('produk') }}" class="btn btn-primary">Back to Home</a>
+        </div>
+    </nav>
+
+    <!-- Check Status Section -->
+    <section style="padding: 3rem 5%; background: linear-gradient(135deg, #FFE5D9 0%, #FFF5F0 100%); min-height: 80vh;">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <div style="background: white; padding: 3rem; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center;">
+                <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; color: #2C2C2C;">Cek Status Pesanan</h1>
+                <p style="color: #6C6C6C; margin-bottom: 2rem; font-size: 1.1rem;">Masukkan nomor pesanan Anda untuk mengecek status</p>
+                
+                <!-- Form Cek Status -->
+                <form method="POST" style="margin-bottom: 2rem;">
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <input 
+                            type="number" 
+                            name="order_id" 
+                            placeholder="Nomor Pesanan (contoh: 1)" 
+                            required
+                            style="flex: 1; padding: 1.2rem; border: 2px solid #E0E0E0; border-radius: 12px; font-size: 1.1rem;"
+                        >
+                        <button type="submit" class="btn btn-primary" style="padding: 1.2rem 2rem; font-size: 1.1rem;">
+                            Cek Status
+                        </button>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #6C6C6C;">
+                        💡 Nomor pesanan akan diberikan setelah Anda melakukan pemesanan
+                    </p>
+                </form>
+
+                <!-- Status Result -->
+                {% if pesanan %}
+                <div style="background: linear-gradient(135deg, #0047FF 0%, #00C9FF 100%); padding: 2.5rem; border-radius: 16px; color: white; text-align: left;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="font-size: 1.8rem; font-weight: 700;">Order #{{ pesanan.id }}</h2>
+                        <span style="background: white; color: #0047FF; padding: 0.5rem 1.2rem; border-radius: 20px; font-weight: 700; text-transform: uppercase; font-size: 0.9rem;">
+                            {{ pesanan.status }}
+                        </span>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 0.3rem;">Nama</p>
+                                <p style="font-weight: 700; font-size: 1.1rem;">{{ pesanan.nama }}</p>
+                            </div>
+                            <div>
+                                <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 0.3rem;">Kontak</p>
+                                <p style="font-weight: 700; font-size: 1.1rem;">{{ pesanan.kontak }}</p>
+                            </div>
+                            <div>
+                                <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 0.3rem;">Jenis Print</p>
+                                <p style="font-weight: 700; font-size: 1.1rem;">{{ pesanan.jenis_print }}</p>
+                            </div>
+                            <div>
+                                <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 0.3rem;">Ukuran</p>
+                                <p style="font-weight: 700; font-size: 1.1rem;">{{ pesanan.ukuran }}</p>
+                            </div>
+                            <div>
+                                <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 0.3rem;">Jumlah</p>
+                                <p style="font-weight: 700; font-size: 1.1rem;">{{ pesanan.jumlah }} pcs</p>
+                            </div>
+                            <div>
+                                <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 0.3rem;">Tanggal Pesan</p>
+                                <p style="font-weight: 700; font-size: 1.1rem;">{{ pesanan.created_at.strftime('%d/%m/%Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Timeline -->
+                    <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px;">
+                        <p style="font-weight: 700; margin-bottom: 1rem;">Status Progress:</p>
+                        <div style="display: flex; justify-content: space-between; position: relative;">
+                            <!-- Progress Line -->
+                            <div style="position: absolute; top: 15px; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.3);"></div>
+                            <div style="position: absolute; top: 15px; left: 0; height: 4px; background: white; width: {% if pesanan.status == 'pending' %}33{% elif pesanan.status == 'proses' %}66{% else %}100{% endif %}%;"></div>
+                            
+                            <!-- Steps -->
+                            <div style="position: relative; text-align: center; z-index: 1;">
+                                <div style="width: 30px; height: 30px; border-radius: 50%; background: white; margin: 0 auto 0.5rem;"></div>
+                                <p style="font-size: 0.85rem;">Pending</p>
+                            </div>
+                            <div style="position: relative; text-align: center; z-index: 1;">
+                                <div style="width: 30px; height: 30px; border-radius: 50%; background: {% if pesanan.status in ['proses', 'selesai'] %}white{% else %}rgba(255,255,255,0.3){% endif %}; margin: 0 auto 0.5rem;"></div>
+                                <p style="font-size: 0.85rem;">Proses</p>
+                            </div>
+                            <div style="position: relative; text-align: center; z-index: 1;">
+                                <div style="width: 30px; height: 30px; border-radius: 50%; background: {% if pesanan.status == 'selesai' %}white{% else %}rgba(255,255,255,0.3){% endif %}; margin: 0 auto 0.5rem;"></div>
+                                <p style="font-size: 0.85rem;">Selesai</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if pesanan.status == 'selesai' %}
+                    <div style="background: rgba(40, 167, 69, 0.2); padding: 1rem; border-radius: 10px; margin-top: 1rem; text-align: center;">
+                        <p style="font-weight: 700; font-size: 1.1rem;">✅ Pesanan Anda sudah selesai!</p>
+                        <p style="font-size: 0.95rem; opacity: 0.9;">Silakan ambil di Unit Produksi Fikri Production</p>
+                    </div>
+                    {% elif pesanan.status == 'proses' %}
+                    <div style="background: rgba(255, 193, 7, 0.2); padding: 1rem; border-radius: 10px; margin-top: 1rem; text-align: center;">
+                        <p style="font-weight: 700; font-size: 1.1rem;">⏳ Pesanan sedang diproses</p>
+                        <p style="font-size: 0.95rem; opacity: 0.9;">Mohon tunggu, kami sedang mengerjakan pesanan Anda</p>
+                    </div>
+                    {% else %}
+                    <div style="background: rgba(255, 255, 255, 0.2); padding: 1rem; border-radius: 10px; margin-top: 1rem; text-align: center;">
+                        <p style="font-weight: 700; font-size: 1.1rem;">📋 Menunggu Konfirmasi</p>
+                        <p style="font-size: 0.95rem; opacity: 0.9;">Admin akan segera mengecek pesanan Anda</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info Tambahan -->
+            <div style="margin-top: 2rem; text-align: center; color: #6C6C6C;">
+                <p style="font-size: 0.95rem;">
+                    <strong>Catatan:</strong> Jika ada pertanyaan, silakan hubungi admin kami
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Fikri Production</h3>
+                <p>Unit Produksi dan Fotokopi Sekolah</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>Email: fikri.production@smkit.sch.id</p>
+                <p>Phone: (0293) 123456</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Fikri Production. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+
+    <style>
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+</html>

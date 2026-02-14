@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Fikri Production</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="admin-logo">
+                <div class="admin-logo-icon">
+                    <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
+                        <path d="M20 20L50 10L80 20L50 90L20 20Z" fill="#FF8C42"/>
+                        <path d="M50 10L80 20L50 50L20 20L50 10Z" fill="#0047FF"/>
+                    </svg>
+                </div>
+                <div class="admin-logo-text">UP-Admin</div>
+            </div>
+
+            <nav>
+                <ul class="admin-menu">
+                    <li class="menu-item">
+                        <a href="{{ url_for('admin') }}" class="menu-link active">
+                            <span class="menu-icon">📋</span>
+                            <span>Order</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#stats" class="menu-link" onclick="scrollToStats(event)">
+                            <span class="menu-icon">📊</span>
+                            <span>Static</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <span class="menu-icon">💰</span>
+                            <span>Price Total</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Header -->
+            <header class="admin-header">
+                <h1 class="admin-title">Order Management</h1>
+                <div class="admin-user">
+                    <div class="user-avatar">A</div>
+                    <span style="font-weight: 600;">Admin</span>
+                    <a href="{{ url_for('admin_logout') }}" class="btn-logout">Logout</a>
+                </div>
+            </header>
+
+            <!-- Statistics Cards -->
+            <div class="stats-container" id="stats">
+                <div class="stat-card">
+                    <div class="stat-icon blue">📦</div>
+                    <div class="stat-info">
+                        <h3 id="totalOrders">0</h3>
+                        <p>Total Orders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">⏳</div>
+                    <div class="stat-info">
+                        <h3 id="pendingOrders">0</h3>
+                        <p>Pending</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">🔄</div>
+                    <div class="stat-info">
+                        <h3 id="processingOrders">0</h3>
+                        <p>Processing</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">✅</div>
+                    <div class="stat-info">
+                        <h3 id="completedOrders">0</h3>
+                        <p>Completed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Section -->
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="filter-search-group">
+                        <!-- Search Box -->
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <form method="GET" action="{{ url_for('admin') }}" style="display: inline;">
+                                <input type="hidden" name="status" value="{{ status_filter }}">
+                                <input 
+                                    type="text" 
+                                    name="search" 
+                                    placeholder="Search by name or contact..." 
+                                    value="{{ search_query }}"
+                                    onchange="this.form.submit()"
+                                >
+                            </form>
+                        </div>
+
+                        <!-- Filter Tabs -->
+                        <div class="filter-tabs">
+                            <a href="{{ url_for('admin', status='all', search=search_query) }}" 
+                               class="filter-tab {% if status_filter == 'all' %}active{% endif %}">
+                                All
+                            </a>
+                            <a href="{{ url_for('admin', status='pending', search=search_query) }}" 
+                               class="filter-tab {% if status_filter == 'pending' %}active{% endif %}">
+                                Pending
+                            </a>
+                            <a href="{{ url_for('admin', status='proses', search=search_query) }}" 
+                               class="filter-tab {% if status_filter == 'proses' %}active{% endif %}">
+                                Process
+                            </a>
+                            <a href="{{ url_for('admin', status='selesai', search=search_query) }}" 
+                               class="filter-tab {% if status_filter == 'selesai' %}active{% endif %}">
+                                Complete
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Export Buttons -->
+                    <div class="export-buttons">
+                        <a href="{{ url_for('export_excel') }}" class="btn-export">
+                            📊 Export Excel
+                        </a>
+                        <a href="{{ url_for('export_pdf') }}" class="btn-export pdf">
+                            📄 Export PDF
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="table-container">
+                    {% if pesanan %}
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Jenis Print</th>
+                                <th>Ukuran</th>
+                                <th>Jumlah</th>
+                                <th>File</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in pesanan %}
+                            <tr>
+                                <td style="font-weight: 700;">{{ loop.index }}.</td>
+                                <td style="font-weight: 600;">{{ p.nama }}</td>
+                                <td>{{ p.kontak }}</td>
+                                <td>{{ p.jenis_print }}</td>
+                                <td>{{ p.ukuran }}</td>
+                                <td style="font-weight: 600;">{{ p.jumlah }}</td>
+                                <td>
+                                    {% if p.file_path %}
+                                    <a href="{{ url_for('download', filename=p.file_path.split('/')[-1]) }}" 
+                                       class="btn-icon btn-download"
+                                       title="Download File">
+                                        📥 file.{{ p.file_path.split('.')[-1] }}
+                                    </a>
+                                    {% else %}
+                                    <span style="color: #999;">No file</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="status-badge status-{{ p.status }}">
+                                        {{ p.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('update', id=p.id) }}" class="status-form">
+                                        <select name="status" class="status-select" onchange="this.form.submit()">
+                                            <option value="pending" {% if p.status == 'pending' %}selected{% endif %}>Pending</option>
+                                            <option value="proses" {% if p.status == 'proses' %}selected{% endif %}>Proses</option>
+                                            <option value="selesai" {% if p.status == 'selesai' %}selected{% endif %}>Selesai</option>
+                                        </select>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No Orders Found</h3>
+                        <p>{% if search_query %}No results for "{{ search_query }}"{% else %}There are no orders yet.{% endif %}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Load Statistics
+        async function loadStats() {
+            try {
+                const response = await fetch('{{ url_for("admin_stats") }}');
+                const data = await response.json();
+                
+                document.getElementById('totalOrders').textContent = data.total;
+                document.getElementById('pendingOrders').textContent = data.pending;
+                document.getElementById('processingOrders').textContent = data.proses;
+                document.getElementById('completedOrders').textContent = data.selesai;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Scroll to stats
+        function scrollToStats(e) {
+            e.preventDefault();
+            document.getElementById('stats').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+
+        // Load stats on page load
+        loadStats();
+
+        // Refresh stats every 30 seconds
+        setInterval(loadStats, 30000);
+    </script>
+
+    <style>
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+</html>
