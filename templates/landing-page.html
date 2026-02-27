@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fikri Production – Digital Printing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #6366F1;
+      --secondary: #8B5CF6;
+      --accent: #EC4899;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --dark: #0F172A;
+      --glass: rgba(255,255,255,0.1);
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--dark); color: #fff; overflow-x: hidden; }
+
+    /* NAVBAR */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(15,23,42,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 900; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: color 0.2s; }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff !important; padding: 0.5rem 1.2rem; border-radius: 25px; font-weight: 700 !important; transition: transform 0.2s, box-shadow 0.2s !important; }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.4); }
+
+    /* HERO */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 40%, #2D1B5A 70%, #0F172A 100%);
+      overflow: hidden; padding: 2rem;
+    }
+    .hero-bg-blob {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.25; animation: float 6s ease-in-out infinite;
+    }
+    .blob1 { width: 500px; height: 500px; background: var(--primary); top: -100px; left: -100px; }
+    .blob2 { width: 400px; height: 400px; background: var(--accent); bottom: -80px; right: -80px; animation-delay: -3s; }
+    .blob3 { width: 300px; height: 300px; background: var(--secondary); top: 40%; left: 50%; transform: translate(-50%,-50%); animation-delay: -1.5s; }
+    @keyframes float { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-30px) scale(1.05)} }
+    .hero-content { position: relative; z-index: 1; max-width: 700px; }
+    .hero-badge { display: inline-block; background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); color: #A5B4FC; padding: 0.4rem 1rem; border-radius: 25px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; letter-spacing: 0.05em; }
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; }
+    .hero h1 span { background: linear-gradient(135deg, #A5B4FC, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-bottom: 2.5rem; line-height: 1.7; }
+    .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.85rem 2rem; border-radius: 50px; font-weight: 700; font-size: 1rem; text-decoration: none; cursor: pointer; border: none; transition: all 0.3s; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; box-shadow: 0 8px 30px rgba(99,102,241,0.4); }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(99,102,241,0.5); }
+    .btn-outline { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.3); }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
+    .hero-stats { display: flex; gap: 2rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* PRODUCTS */
+    .products { padding: 6rem 2.5rem; background: #0A0E1A; }
+    .section-header { text-align: center; margin-bottom: 3.5rem; }
+    .section-badge { display: inline-block; background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(236,72,153,0.2)); border: 1px solid rgba(99,102,241,0.3); color: #A5B4FC; padding: 0.35rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; }
+    .section-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; margin-bottom: 0.75rem; }
+    .section-header p { color: rgba(255,255,255,0.5); font-size: 1rem; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; max-width: 1100px; margin: 0 auto; }
+    .product-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 2rem;
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      animation: slideUp 0.8s ease-out both;
+    }
+    .product-card:hover { transform: translateY(-10px); box-shadow: 0 25px 60px rgba(0,0,0,0.4); }
+    .product-card.available { border-color: rgba(16,185,129,0.3); }
+    .product-card.available:hover { border-color: rgba(16,185,129,0.6); box-shadow: 0 25px 60px rgba(16,185,129,0.15); }
+    .product-card.coming-soon { filter: saturate(0.3); }
+    .product-card.coming-soon:hover { filter: saturate(0.4); }
+    @keyframes slideUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+    .product-card:nth-child(1){animation-delay:0s}
+    .product-card:nth-child(2){animation-delay:0.1s}
+    .product-card:nth-child(3){animation-delay:0.15s}
+    .product-card:nth-child(4){animation-delay:0.2s}
+    .product-card:nth-child(5){animation-delay:0.25s}
+    .product-card:nth-child(6){animation-delay:0.3s}
+    .product-icon { width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin-bottom: 1.2rem; }
+    .product-badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.8rem; }
+    .badge-available { background: rgba(16,185,129,0.2); color: #6EE7B7; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-soon { background: rgba(100,116,139,0.2); color: #94A3B8; border: 1px solid rgba(100,116,139,0.3); }
+    .product-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .product-card p { color: rgba(255,255,255,0.5); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .product-features { list-style: none; margin-bottom: 1.5rem; }
+    .product-features li { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 0.4rem; }
+    .product-features li::before { content: '✓'; color: var(--success); font-weight: 700; }
+    .btn-card { width: 100%; padding: 0.75rem; border-radius: 12px; border: none; cursor: pointer; font-weight: 700; font-size: 0.95rem; transition: all 0.3s; text-decoration: none; display: block; text-align: center; }
+    .btn-card-available { background: linear-gradient(135deg, var(--success), #059669); color: #fff; }
+    .btn-card-available:hover { transform: scale(1.03); box-shadow: 0 8px 25px rgba(16,185,129,0.4); }
+    .btn-card-disabled { background: rgba(100,116,139,0.2); color: rgba(255,255,255,0.3); cursor: not-allowed; }
+
+    /* HOW IT WORKS */
+    .how-it-works { padding: 6rem 2.5rem; background: linear-gradient(180deg, #0A0E1A, #0F172A); }
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; max-width: 900px; margin: 0 auto; }
+    .step-card { text-align: center; padding: 2rem 1.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; }
+    .step-num { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 900; margin: 0 auto 1rem; }
+    .step-card h4 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; margin-bottom: 0.5rem; }
+    .step-card p { color: rgba(255,255,255,0.5); font-size: 0.88rem; line-height: 1.6; }
+
+    /* FOOTER */
+    footer { background: #060A14; border-top: 1px solid rgba(255,255,255,0.06); padding: 2.5rem; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.88rem; }
+    footer span { color: var(--accent); }
+
+    /* FLASH MESSAGES */
+    .flash-container { position: fixed; top: 80px; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+    .flash { padding: 0.8rem 1.2rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: slideInRight 0.3s ease; max-width: 320px; }
+    .flash-success { background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.4); color: #6EE7B7; }
+    .flash-danger { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); color: #FCA5A5; }
+    .flash-info { background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); color: #A5B4FC; }
+    @keyframes slideInRight { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+
+    @media(max-width:768px) {
+      nav { padding: 1rem 1.2rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .hero { min-height: 90vh; }
+      .products, .how-it-works { padding: 4rem 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">⚡ Fikri Production</div>
+  <div class="nav-links">
+    <a href="/cek-status">Cek Status</a>
+    <a href="/admin/login">Admin</a>
+    <a href="/pesan" class="nav-cta">Order Sekarang →</a>
+  </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+  {% for category, message in messages %}
+  <div class="flash flash-{{ category }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-blob blob1"></div>
+  <div class="hero-bg-blob blob2"></div>
+  <div class="hero-bg-blob blob3"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🏫 Unit Produksi Sekolah</div>
+    <h1>Cetak Semua<br/>Kebutuhan Kamu di<br/><span>Fikri Production</span></h1>
+    <p>Layanan digital printing profesional, cepat, dan berkualitas. Pesan online 24/7, ambil di sekolah. Hasil terbaik dengan harga terjangkau!</p>
+    <div class="hero-actions">
+      <a href="/pesan" class="btn btn-primary">🚀 Order Sekarang</a>
+      <a href="/cek-status" class="btn btn-outline">🔍 Cek Status Pesanan</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Pesanan Selesai</div></div>
+      <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Order Online</div></div>
+      <div class="stat"><div class="stat-num">5</div><div class="stat-label">Layanan Segera</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="products">
+  <div class="section-header">
+    <div class="section-badge">📦 Layanan Kami</div>
+    <h2>Produk & Layanan</h2>
+    <p>Temukan semua kebutuhan cetak kamu disini</p>
+  </div>
+  <div class="products-grid">
+    <!-- Card 1: Available -->
+    <div class="product-card available">
+      <div class="product-icon" style="background:rgba(16,185,129,0.15);">🖨️</div>
+      <span class="product-badge badge-available">✅ TERSEDIA</span>
+      <h3>Document Printing</h3>
+      <p>Cetak dokumen, laporan, skripsi, makalah, dan berbagai dokumen lainnya dengan kualitas terbaik.</p>
+      <ul class="product-features">
+        <li>Hitam Putih & Berwarna</li>
+        <li>Ukuran A4, A3, F4, Letter</li>
+        <li>Berbagai jenis kertas</li>
+        <li>Upload file langsung</li>
+      </ul>
+      <a href="/pesan" class="btn-card btn-card-available">Pesan Sekarang →</a>
+    </div>
+    <!-- Cards 2-6: Coming Soon -->
+    <div class="product-card coming-soon">
+      <div class="product-icon" style="background:rgba(100,116,139,0.15);">🖼️</div>
+      <span class="product-badge badge-soon">🔒 COMING SOON</span>
+      <h3>Foto & Banner</h3>
+      <p>Cetak foto, banner, spanduk dengan resolusi tinggi untuk berbagai kebutuhan.</p>
+      <ul class="product-features">
+        <li>Resolusi tinggi</li>
+        <li>Berbagai ukuran</li>
+        <li>Indoor & outdoor</li>
+      </ul>
+      <button class="btn-card btn-card-disabled" disabled>Segera Hadir</button>
+    </div>
+    <div class="product-card coming-soon">
+      <div class="product-icon" style="background:rgba(100,116,139,0.15);">📚</div>
+      <span class="product-badge badge-soon">🔒 COMING SOON</span>
+      <h3>Jilid & Binding</h3>
+      <p>Layanan jilid spiral, soft cover, hard cover untuk laporan dan karya tulis.</p>
+      <ul class="product-features">
+        <li>Spiral & Ring Binding</li>
+        <li>Soft & Hard Cover</li>
+        <li>Finishing rapi</li>
+      </ul>
+      <button class="btn-card btn-card-disabled" disabled>Segera Hadir</button>
+    </div>
+    <div class="product-card coming-soon">
+      <div class="product-icon" style="background:rgba(100,116,139,0.15);">🎨</div>
+      <span class="product-badge badge-soon">🔒 COMING SOON</span>
+      <h3>Desain Grafis</h3>
+      <p>Layanan desain logo, brosur, poster, undangan, dan berbagai materi promosi.</p>
+      <ul class="product-features">
+        <li>Revisi tak terbatas</li>
+        <li>File siap cetak</li>
+        <li>Pengerjaan cepat</li>
+      </ul>
+      <button class="btn-card btn-card-disabled" disabled>Segera Hadir</button>
+    </div>
+    <div class="product-card coming-soon">
+      <div class="product-icon" style="background:rgba(100,116,139,0.15);">👕</div>
+      <span class="product-badge badge-soon">🔒 COMING SOON</span>
+      <h3>Sablon Kaos</h3>
+      <p>Cetak kaos custom untuk OSIS, ekskul, kelas, dan berbagai kebutuhan sekolah.</p>
+      <ul class="product-features">
+        <li>Sablon DTF & DTG</li>
+        <li>Minimum order rendah</li>
+        <li>Berbagai bahan</li>
+      </ul>
+      <button class="btn-card btn-card-disabled" disabled>Segera Hadir</button>
+    </div>
+    <div class="product-card coming-soon">
+      <div class="product-icon" style="background:rgba(100,116,139,0.15);">🏷️</div>
+      <span class="product-badge badge-soon">🔒 COMING SOON</span>
+      <h3>Sticker & Label</h3>
+      <p>Cetak stiker custom, label produk, stiker vinyl waterproof untuk berbagai kebutuhan.</p>
+      <ul class="product-features">
+        <li>Waterproof vinyl</li>
+        <li>Cutting custom</li>
+        <li>Full color</li>
+      </ul>
+      <button class="btn-card btn-card-disabled" disabled>Segera Hadir</button>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+  <div class="section-header">
+    <div class="section-badge">⚡ Cara Pemesanan</div>
+    <h2>Mudah & Cepat</h2>
+    <p>Pesan dalam 4 langkah sederhana</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h4>Isi Data Diri</h4>
+      <p>Masukkan nama, nomor kontak, dan email kamu untuk konfirmasi pesanan.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h4>Pilih Detail Cetak</h4>
+      <p>Tentukan jenis, warna, ukuran, jenis kertas, jumlah, dan tanggal ambil.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h4>Upload File</h4>
+      <p>Upload file yang ingin dicetak (PDF, DOC, JPG, PNG) max 10 file, 20MB/file.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <h4>Ambil Pesanan</h4>
+      <p>Simpan nomor antrian kamu dan ambil pesanan sesuai jadwal yang dipilih.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 <span>Fikri Production</span> – Unit Produksi Digital Printing Sekolah. All rights reserved.</p>
+  <p style="margin-top:0.5rem;">Dibuat dengan ❤️ untuk kemudahan layanan percetakan sekolah.</p>
+</footer>
+
+<script>
+  // Auto-hide flash messages
+  setTimeout(() => {
+    document.querySelectorAll('.flash').forEach(el => {
+      el.style.transition = 'opacity 0.5s';
+      el.style.opacity = '0';
+      setTimeout(() => el.remove(), 500);
+    });
+  }, 4000);
+</script>
+</body>
+</html>

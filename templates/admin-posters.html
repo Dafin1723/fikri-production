@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manajemen Poster – Fikri Production</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;900&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family:'DM Sans',sans-serif; background:#060A14; color:#fff; min-height:100vh; }
+    .topbar { background:rgba(15,23,42,0.95); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.08); padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between; }
+    .topbar-logo { font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:1.2rem; background:linear-gradient(135deg,#6366F1,#EC4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .topbar a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.85rem; font-weight:600; transition:color 0.2s; }
+    .topbar a:hover { color:#fff; }
+    .main { padding:2rem; max-width:1000px; margin:0 auto; }
+    .page-title { font-family:'Space Grotesk',sans-serif; font-size:1.8rem; font-weight:900; margin-bottom:0.3rem; }
+    .page-sub { color:rgba(255,255,255,0.4); font-size:0.9rem; margin-bottom:2rem; }
+
+    .flash { padding:0.8rem 1.2rem; border-radius:10px; font-size:0.9rem; font-weight:600; margin-bottom:1.2rem; }
+    .flash-success { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#6EE7B7; }
+    .flash-danger { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#FCA5A5; }
+
+    .upload-card {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      border-radius:20px; padding:2rem; margin-bottom:2rem;
+    }
+    .upload-card h3 { font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:1.2rem; color:#A5B4FC; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media(max-width:600px){ .form-row{grid-template-columns:1fr;} }
+    label { display:block; font-size:0.82rem; font-weight:700; color:rgba(255,255,255,0.7); margin-bottom:0.4rem; }
+    input[type=text], textarea, input[type=file] {
+      width:100%; padding:0.75rem 1rem; border-radius:10px; border:none; outline:none;
+      background:rgba(255,255,255,0.07); box-shadow:inset 3px 3px 8px rgba(0,0,0,0.3);
+      color:#fff; font-family:'DM Sans',sans-serif; font-size:0.9rem;
+    }
+    input[type=file] { cursor:pointer; }
+    textarea { min-height:80px; resize:vertical; }
+    .form-group { margin-bottom:1rem; }
+    .btn-upload {
+      padding:0.75rem 1.8rem; background:linear-gradient(135deg,#6366F1,#8B5CF6);
+      border:none; border-radius:12px; color:#fff; font-weight:700; font-size:0.95rem;
+      cursor:pointer; margin-top:0.5rem; transition:all 0.2s;
+    }
+    .btn-upload:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(99,102,241,0.4); }
+
+    /* POSTER GRID */
+    .poster-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.2rem; }
+    .poster-card {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px; overflow:hidden; transition:transform 0.2s;
+    }
+    .poster-card:hover { transform:translateY(-5px); }
+    .poster-img { width:100%; height:160px; object-fit:cover; display:block; }
+    .poster-img-placeholder { width:100%; height:160px; background:rgba(99,102,241,0.1); display:flex; align-items:center; justify-content:center; font-size:3rem; }
+    .poster-info { padding:1rem; }
+    .poster-name { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.95rem; margin-bottom:0.3rem; }
+    .poster-title { color:rgba(255,255,255,0.6); font-size:0.8rem; margin-bottom:0.8rem; }
+    .btn-del {
+      width:100%; padding:0.5rem; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3);
+      color:#FCA5A5; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer;
+      transition:background 0.15s;
+    }
+    .btn-del:hover { background:rgba(239,68,68,0.3); }
+
+    .empty-state { text-align:center; padding:3rem; color:rgba(255,255,255,0.3); }
+    .empty-state .e-icon { font-size:3rem; margin-bottom:1rem; }
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">⚡ Fikri Production</div>
+  <a href="/admin/dashboard">← Kembali ke Dashboard</a>
+</div>
+
+<div class="main">
+  <div class="page-title">🖼️ Manajemen Poster</div>
+  <div class="page-sub">Upload gambar/poster untuk produk coming soon</div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}{% for category, message in messages %}
+  <div class="flash flash-{{ category }}">{{ message }}</div>
+  {% endfor %}{% endif %}
+  {% endwith %}
+
+  <!-- UPLOAD FORM -->
+  <div class="upload-card">
+    <h3>📤 Upload Poster Baru</h3>
+    <form method="POST" action="/admin/posters/upload" enctype="multipart/form-data">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nama Produk *</label>
+          <input type="text" name="product_name" placeholder="misal: Foto & Banner" required/>
+        </div>
+        <div class="form-group">
+          <label>Judul (opsional)</label>
+          <input type="text" name="title" placeholder="Judul poster"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Deskripsi (opsional)</label>
+        <textarea name="description" placeholder="Deskripsi produk..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>File Gambar * (PNG, JPG, JPEG, GIF, WEBP)</label>
+        <input type="file" name="image" accept=".png,.jpg,.jpeg,.gif,.webp" required/>
+      </div>
+      <button type="submit" class="btn-upload">📤 Upload Poster</button>
+    </form>
+  </div>
+
+  <!-- POSTER GRID -->
+  {% if posters %}
+  <div class="poster-grid">
+    {% for poster in posters %}
+    <div class="poster-card">
+      <img src="/static/posters/{{ poster.image_path }}" alt="{{ poster.product_name }}" class="poster-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+      <div class="poster-img-placeholder" style="display:none">🖼️</div>
+      <div class="poster-info">
+        <div class="poster-name">{{ poster.product_name }}</div>
+        {% if poster.title %}<div class="poster-title">{{ poster.title }}</div>{% endif %}
+        <form method="POST" action="/admin/posters/delete/{{ poster.id }}" onsubmit="return confirm('Hapus poster ini?')">
+          <button type="submit" class="btn-del">🗑️ Hapus</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="e-icon">🖼️</div>
+    <p>Belum ada poster yang diupload.</p>
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>

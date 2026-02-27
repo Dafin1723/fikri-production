@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard – Fikri Production</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;900&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --primary:#6366F1; --secondary:#8B5CF6; --accent:#EC4899; --success:#10B981; --warning:#F59E0B; --dark:#0F172A; }
+    body { font-family:'DM Sans',sans-serif; background:#060A14; color:#fff; min-height:100vh; }
+
+    /* SIDEBAR-LESS HEADER */
+    .topbar {
+      background:rgba(15,23,42,0.95); backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:50;
+    }
+    .topbar-logo { font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:1.2rem; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .topbar-nav { display:flex; gap:1rem; align-items:center; }
+    .topbar-nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.85rem; font-weight:600; transition:color 0.2s; }
+    .topbar-nav a:hover { color:#fff; }
+    .btn-logout { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#FCA5A5; padding:0.4rem 1rem; border-radius:20px; text-decoration:none; font-size:0.8rem; font-weight:700; }
+    .btn-logout:hover { background:rgba(239,68,68,0.25); color:#FCA5A5 !important; }
+
+    .main { padding:2rem; max-width:1400px; margin:0 auto; }
+
+    /* PAGE TITLE */
+    .page-title { font-family:'Space Grotesk',sans-serif; font-size:1.8rem; font-weight:900; margin-bottom:0.3rem; }
+    .page-sub { color:rgba(255,255,255,0.4); font-size:0.9rem; margin-bottom:2rem; }
+
+    /* FLASH */
+    .flash { padding:0.8rem 1.2rem; border-radius:10px; font-size:0.9rem; font-weight:600; margin-bottom:1.2rem; }
+    .flash-success { background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#6EE7B7; }
+    .flash-danger { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#FCA5A5; }
+    .flash-info { background:rgba(99,102,241,0.15); border:1px solid rgba(99,102,241,0.3); color:#A5B4FC; }
+
+    /* STAT CARDS */
+    .stats-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; margin-bottom:2rem; }
+    @media(max-width:900px){ .stats-grid{grid-template-columns:repeat(2,1fr);} }
+    @media(max-width:480px){ .stats-grid{grid-template-columns:1fr;} }
+    .stat-card {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px; padding:1.5rem;
+    }
+    .stat-card-num { font-family:'Space Grotesk',sans-serif; font-size:2.2rem; font-weight:900; margin-bottom:0.3rem; }
+    .stat-card-label { color:rgba(255,255,255,0.5); font-size:0.82rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+    .stat-card.total { border-color:rgba(99,102,241,0.3); }
+    .stat-card.total .stat-card-num { background:linear-gradient(135deg,var(--primary),var(--secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .stat-card.pending { border-color:rgba(245,158,11,0.3); }
+    .stat-card.pending .stat-card-num { color:#FCD34D; }
+    .stat-card.proses { border-color:rgba(59,130,246,0.3); }
+    .stat-card.proses .stat-card-num { color:#93C5FD; }
+    .stat-card.selesai { border-color:rgba(16,185,129,0.3); }
+    .stat-card.selesai .stat-card-num { color:#6EE7B7; }
+
+    /* TOOLBAR */
+    .toolbar { display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center; margin-bottom:1.5rem; }
+    .toolbar-left { display:flex; gap:0.75rem; flex:1; flex-wrap:wrap; }
+    select.filter-sel {
+      padding:0.6rem 0.9rem; border-radius:10px; background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:'DM Sans',sans-serif;
+      font-size:0.88rem; cursor:pointer; outline:none;
+    }
+    select.filter-sel option { background:#1E1B4B; }
+    .search-inp {
+      padding:0.6rem 1rem; border-radius:10px; background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:'DM Sans',sans-serif;
+      font-size:0.88rem; outline:none; min-width:200px;
+    }
+    .search-inp::placeholder { color:rgba(255,255,255,0.3); }
+    .search-inp:focus, .filter-sel:focus { border-color:rgba(99,102,241,0.5); }
+    .btn-filter {
+      padding:0.6rem 1.2rem; border-radius:10px; background:linear-gradient(135deg,var(--primary),var(--secondary));
+      border:none; color:#fff; font-weight:700; font-size:0.88rem; cursor:pointer;
+    }
+    .btn-export {
+      padding:0.6rem 1rem; border-radius:10px; font-weight:700; font-size:0.85rem;
+      cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem;
+    }
+    .btn-excel { background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.3); color:#6EE7B7; }
+    .btn-excel:hover { background:rgba(16,185,129,0.3); }
+    .btn-pdf { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#FCA5A5; }
+    .btn-pdf:hover { background:rgba(239,68,68,0.25); }
+    .btn-poster { background:rgba(99,102,241,0.15); border:1px solid rgba(99,102,241,0.3); color:#A5B4FC; }
+    .btn-poster:hover { background:rgba(99,102,241,0.25); }
+
+    /* TABLE */
+    .table-wrap { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:16px; overflow:hidden; }
+    .table-scroll { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:0.84rem; }
+    thead th {
+      background:rgba(99,102,241,0.15); padding:0.9rem 1rem; text-align:left;
+      font-weight:700; color:#A5B4FC; text-transform:uppercase; font-size:0.72rem; letter-spacing:0.06em;
+      white-space:nowrap;
+    }
+    tbody tr { border-top:1px solid rgba(255,255,255,0.05); transition:background 0.15s; }
+    tbody tr:hover { background:rgba(255,255,255,0.04); }
+    td { padding:0.8rem 1rem; vertical-align:middle; color:rgba(255,255,255,0.85); white-space:nowrap; }
+    .antrian-badge { font-family:'Space Grotesk',sans-serif; font-weight:700; color:#A5B4FC; font-size:0.9rem; }
+
+    .status-badge { display:inline-block; padding:0.25rem 0.7rem; border-radius:20px; font-size:0.75rem; font-weight:700; }
+    .status-pending { background:rgba(245,158,11,0.2); color:#FCD34D; border:1px solid rgba(245,158,11,0.4); }
+    .status-proses { background:rgba(59,130,246,0.2); color:#93C5FD; border:1px solid rgba(59,130,246,0.4); }
+    .status-selesai { background:rgba(16,185,129,0.2); color:#6EE7B7; border:1px solid rgba(16,185,129,0.4); }
+
+    /* INLINE STATUS FORM */
+    .status-form select {
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+      color:#fff; padding:0.3rem 0.6rem; border-radius:8px; font-size:0.8rem;
+      cursor:pointer; outline:none;
+    }
+    .status-form select option { background:#1E1B4B; }
+
+    /* DELETE BUTTON */
+    .btn-del {
+      background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#FCA5A5;
+      padding:0.3rem 0.7rem; border-radius:8px; font-size:0.78rem; font-weight:700;
+      cursor:pointer; transition:background 0.15s;
+    }
+    .btn-del:hover { background:rgba(239,68,68,0.3); }
+
+    .empty-state { text-align:center; padding:4rem 2rem; color:rgba(255,255,255,0.3); }
+    .empty-state .empty-icon { font-size:3rem; margin-bottom:1rem; }
+    .empty-state p { font-size:0.9rem; }
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-logo">⚡ Fikri Production Admin</div>
+  <div class="topbar-nav">
+    <a href="/" target="_blank">🌐 Lihat Site</a>
+    <a href="/admin/posters" class="btn-poster" style="padding:0.4rem 0.9rem;border-radius:20px;font-size:0.8rem;">🖼️ Poster</a>
+    <a href="/admin/logout" class="btn-logout">🔓 Logout</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-title">📊 Dashboard</div>
+  <div class="page-sub">Kelola semua pesanan Fikri Production</div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}{% for category, message in messages %}
+  <div class="flash flash-{{ category }}">{{ message }}</div>
+  {% endfor %}{% endif %}
+  {% endwith %}
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <div class="stat-card-num">{{ stats.total }}</div>
+      <div class="stat-card-label">📦 Total Pesanan</div>
+    </div>
+    <div class="stat-card pending">
+      <div class="stat-card-num">{{ stats.pending }}</div>
+      <div class="stat-card-label">⏳ Menunggu</div>
+    </div>
+    <div class="stat-card proses">
+      <div class="stat-card-num">{{ stats.proses }}</div>
+      <div class="stat-card-label">⚙️ Diproses</div>
+    </div>
+    <div class="stat-card selesai">
+      <div class="stat-card-num">{{ stats.selesai }}</div>
+      <div class="stat-card-label">✅ Selesai</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <form method="GET" action="/admin/dashboard">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <select class="filter-sel" name="status">
+          <option value="">Semua Status</option>
+          <option value="pending" {% if status_filter=='pending' %}selected{% endif %}>⏳ Menunggu</option>
+          <option value="proses" {% if status_filter=='proses' %}selected{% endif %}>⚙️ Diproses</option>
+          <option value="selesai" {% if status_filter=='selesai' %}selected{% endif %}>✅ Selesai</option>
+        </select>
+        <input class="search-inp" type="text" name="search" placeholder="🔍 Cari nama / antrian / email..." value="{{ search }}"/>
+        <button type="submit" class="btn-filter">Filter</button>
+      </div>
+      <a href="/admin/export/excel" class="btn-export btn-excel">📊 Excel</a>
+      <a href="/admin/export/pdf" class="btn-export btn-pdf">📄 PDF</a>
+    </div>
+  </form>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <div class="table-scroll">
+      {% if pesanan_list %}
+      <table>
+        <thead>
+          <tr>
+            <th>Nomor Antrian</th>
+            <th>Nama</th>
+            <th>Email</th>
+            <th>Jenis</th>
+            <th>Warna</th>
+            <th>Kertas</th>
+            <th>Jml</th>
+            <th>Tgl Ambil</th>
+            <th>Files</th>
+            <th>Status</th>
+            <th>Update</th>
+            <th>Hapus</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pesanan_list %}
+          <tr>
+            <td><span class="antrian-badge">{{ p.nomor_antrian }}</span></td>
+            <td>{{ p.nama }}</td>
+            <td style="font-size:0.8rem;color:rgba(255,255,255,0.6)">{{ p.email }}</td>
+            <td>{{ p.jenis_print }}</td>
+            <td>{{ p.warna }}</td>
+            <td>{{ p.jenis_kertas }}</td>
+            <td style="text-align:center">{{ p.jumlah }}</td>
+            <td>{{ p.tanggal_ambil }}</td>
+            <td style="text-align:center">{{ p.file_count }}</td>
+            <td><span class="status-badge status-{{ p.status }}">{{ p.status_indo }}</span></td>
+            <td>
+              <form class="status-form" method="POST" action="/admin/update-status/{{ p.id }}">
+                <select name="status" onchange="this.form.submit()">
+                  <option value="pending" {% if p.status=='pending' %}selected{% endif %}>⏳ Menunggu</option>
+                  <option value="proses" {% if p.status=='proses' %}selected{% endif %}>⚙️ Proses</option>
+                  <option value="selesai" {% if p.status=='selesai' %}selected{% endif %}>✅ Selesai</option>
+                </select>
+              </form>
+            </td>
+            <td>
+              <form method="POST" action="/admin/delete/{{ p.id }}" onsubmit="return confirm('Hapus pesanan {{ p.nomor_antrian }}?')">
+                <button type="submit" class="btn-del">🗑️</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>Belum ada pesanan{% if status_filter or search %} dengan filter ini{% endif %}.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+</body>
+</html>

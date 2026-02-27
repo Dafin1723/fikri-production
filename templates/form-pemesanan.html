@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Form Pemesanan – Fikri Production</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;900&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:#6366F1; --secondary:#8B5CF6; --accent:#EC4899;
+      --success:#10B981; --warning:#F59E0B; --dark:#0F172A;
+    }
+    body { font-family:'DM Sans',sans-serif; background:linear-gradient(135deg,#0F172A 0%,#1E1B4B 50%,#0F172A 100%); min-height:100vh; color:#fff; }
+    .page-wrap { max-width:740px; margin:0 auto; padding:2rem 1.2rem 4rem; }
+
+    /* HEADER */
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2.5rem; }
+    .logo { font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:900; background:linear-gradient(135deg,var(--primary),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-decoration:none; }
+    .back-link { color:rgba(255,255,255,0.5); text-decoration:none; font-size:0.9rem; font-weight:600; display:flex; align-items:center; gap:0.4rem; transition:color 0.2s; }
+    .back-link:hover { color:#fff; }
+
+    /* PROGRESS */
+    .progress-wrap { margin-bottom:2rem; }
+    .progress-bar-bg { background:rgba(255,255,255,0.1); border-radius:8px; height:6px; margin-bottom:1.5rem; }
+    .progress-bar-fill { background:linear-gradient(90deg,var(--primary),var(--accent)); border-radius:8px; height:100%; transition:width 0.5s ease; }
+    .steps-indicator { display:flex; justify-content:space-between; position:relative; }
+    .step-dot-wrap { display:flex; flex-direction:column; align-items:center; gap:0.4rem; flex:1; }
+    .step-dot { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; border:2px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.4); transition:all 0.3s; }
+    .step-dot.active { background:linear-gradient(135deg,var(--primary),var(--secondary)); border-color:transparent; color:#fff; box-shadow:0 0 20px rgba(99,102,241,0.5); }
+    .step-dot.done { background:var(--success); border-color:transparent; color:#fff; }
+    .step-label { font-size:0.72rem; color:rgba(255,255,255,0.4); text-align:center; font-weight:600; }
+    .step-label.active { color:#A5B4FC; }
+
+    /* CARD */
+    .form-card {
+      background:rgba(255,255,255,0.06);
+      backdrop-filter:blur(30px);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:24px;
+      padding:2.5rem;
+      box-shadow:0 20px 60px rgba(0,0,0,0.4);
+    }
+    .step-title { font-family:'Space Grotesk',sans-serif; font-size:1.5rem; font-weight:700; margin-bottom:0.5rem; }
+    .step-subtitle { color:rgba(255,255,255,0.5); font-size:0.9rem; margin-bottom:2rem; }
+
+    /* STEP PANELS */
+    .step-panel { display:none; animation:fadeIn 0.4s ease; }
+    .step-panel.active { display:block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+    /* INPUTS */
+    .form-group { margin-bottom:1.2rem; }
+    label { display:block; font-size:0.85rem; font-weight:700; color:rgba(255,255,255,0.8); margin-bottom:0.5rem; letter-spacing:0.02em; }
+    label span.req { color:var(--accent); }
+    input[type=text], input[type=email], input[type=number], input[type=date], select, textarea {
+      width:100%; padding:0.8rem 1rem; border-radius:12px; border:none; outline:none;
+      background:rgba(255,255,255,0.07);
+      box-shadow:inset 3px 3px 8px rgba(0,0,0,0.3), inset -2px -2px 6px rgba(255,255,255,0.04);
+      color:#fff; font-family:'DM Sans',sans-serif; font-size:0.95rem;
+      transition:box-shadow 0.2s, background 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      background:rgba(99,102,241,0.15);
+      box-shadow:inset 3px 3px 8px rgba(0,0,0,0.3), 0 0 0 2px rgba(99,102,241,0.5);
+    }
+    select option { background:#1E1B4B; }
+    textarea { min-height:90px; resize:vertical; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media(max-width:480px){ .form-row{grid-template-columns:1fr;} }
+
+    /* RADIO CARDS */
+    .radio-group { display:flex; gap:0.75rem; }
+    .radio-card { flex:1; }
+    .radio-card input { display:none; }
+    .radio-label {
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.3rem;
+      padding:1rem; border-radius:14px; cursor:pointer;
+      border:2px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04);
+      text-align:center; transition:all 0.2s; font-weight:600; font-size:0.9rem;
+    }
+    .radio-label span.icon { font-size:1.6rem; }
+    .radio-card input:checked + .radio-label { border-color:var(--primary); background:rgba(99,102,241,0.2); color:#A5B4FC; }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      border:2px dashed rgba(99,102,241,0.4); border-radius:16px; padding:2.5rem;
+      text-align:center; cursor:pointer; transition:all 0.3s; background:rgba(99,102,241,0.05);
+    }
+    .upload-zone:hover, .upload-zone.drag-over { border-color:var(--primary); background:rgba(99,102,241,0.12); }
+    .upload-icon { font-size:2.5rem; margin-bottom:0.75rem; }
+    .upload-zone h4 { font-family:'Space Grotesk',sans-serif; font-weight:700; margin-bottom:0.3rem; }
+    .upload-zone p { color:rgba(255,255,255,0.5); font-size:0.85rem; }
+    .upload-zone input { display:none; }
+    .upload-btn {
+      display:inline-block; margin-top:1rem; padding:0.6rem 1.5rem;
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      border-radius:25px; color:#fff; font-weight:700; font-size:0.9rem; cursor:pointer;
+    }
+    .file-list { margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; }
+    .file-item {
+      display:flex; align-items:center; gap:0.75rem; padding:0.7rem 1rem;
+      background:rgba(255,255,255,0.06); border-radius:10px; font-size:0.85rem;
+    }
+    .file-item-icon { font-size:1.2rem; }
+    .file-item-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .file-item-size { color:rgba(255,255,255,0.4); font-size:0.78rem; white-space:nowrap; }
+    .file-remove {
+      width:22px; height:22px; border-radius:50%; background:rgba(239,68,68,0.2);
+      border:none; color:#FCA5A5; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-size:1rem; line-height:1; transition:transform 0.2s, background 0.2s; flex-shrink:0;
+    }
+    .file-remove:hover { transform:rotate(90deg); background:rgba(239,68,68,0.4); }
+    .file-count-badge { display:inline-block; background:rgba(99,102,241,0.2); color:#A5B4FC; padding:0.2rem 0.7rem; border-radius:20px; font-size:0.78rem; font-weight:700; margin-top:0.5rem; }
+
+    /* SUMMARY */
+    .summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+    @media(max-width:480px){ .summary-grid{grid-template-columns:1fr;} }
+    .summary-item { background:rgba(255,255,255,0.05); border-radius:12px; padding:0.9rem 1rem; }
+    .summary-item .s-label { font-size:0.75rem; color:rgba(255,255,255,0.4); font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem; }
+    .summary-item .s-value { font-weight:700; font-size:0.95rem; }
+
+    /* BUTTONS */
+    .btn-row { display:flex; gap:0.75rem; margin-top:2rem; }
+    .btn-next {
+      flex:1; padding:0.9rem; border:none; border-radius:14px; cursor:pointer;
+      background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff;
+      font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
+      transition:transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-next:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(99,102,241,0.4); }
+    .btn-prev {
+      padding:0.9rem 1.5rem; border:1px solid rgba(255,255,255,0.2); border-radius:14px; cursor:pointer;
+      background:transparent; color:#fff; font-family:'DM Sans',sans-serif; font-weight:700; font-size:1rem;
+      transition:background 0.2s;
+    }
+    .btn-prev:hover { background:rgba(255,255,255,0.08); }
+    .btn-submit { flex:1; }
+
+    /* SPINNER */
+    .spinner { display:none; width:20px; height:20px; border:3px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* ERROR */
+    .error-box { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:1rem; color:#FCA5A5; font-size:0.9rem; margin-top:1rem; display:none; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="page-header">
+    <a href="/" class="logo">⚡ Fikri Production</a>
+    <a href="/" class="back-link">← Kembali</a>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="steps-indicator">
+      <div class="step-dot-wrap">
+        <div class="step-dot active" id="dot1">1</div>
+        <div class="step-label active" id="lbl1">Data Diri</div>
+      </div>
+      <div class="step-dot-wrap">
+        <div class="step-dot" id="dot2">2</div>
+        <div class="step-label" id="lbl2">Detail Order</div>
+      </div>
+      <div class="step-dot-wrap">
+        <div class="step-dot" id="dot3">3</div>
+        <div class="step-label" id="lbl3">Upload File</div>
+      </div>
+      <div class="step-dot-wrap">
+        <div class="step-dot" id="dot4">4</div>
+        <div class="step-label" id="lbl4">Konfirmasi</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <!-- STEP 1 -->
+    <div class="step-panel active" id="step1">
+      <div class="step-title">👤 Data Diri</div>
+      <div class="step-subtitle">Isi informasi diri kamu untuk proses pemesanan</div>
+      <div class="form-group">
+        <label>Nama Lengkap <span class="req">*</span></label>
+        <input type="text" id="nama" placeholder="Masukkan nama lengkap" required/>
+      </div>
+      <div class="form-group">
+        <label>Nomor WhatsApp / Kontak <span class="req">*</span></label>
+        <input type="text" id="kontak" placeholder="08xxxxxxxxxx" required/>
+      </div>
+      <div class="form-group">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="nama@email.com" required/>
+      </div>
+      <div class="btn-row">
+        <button class="btn-next" onclick="goNext(1)">Lanjut ke Detail Order →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-panel" id="step2">
+      <div class="step-title">🖨️ Detail Order</div>
+      <div class="step-subtitle">Pilih spesifikasi cetakan kamu</div>
+      <div class="form-group">
+        <label>Jenis Print <span class="req">*</span></label>
+        <select id="jenis_print">
+          <option value="">-- Pilih Jenis --</option>
+          <option>Document Printing</option>
+          <option>Laporan / Skripsi</option>
+          <option>Makalah / Tugas</option>
+          <option>Foto</option>
+          <option>Lainnya</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Warna <span class="req">*</span></label>
+        <div class="radio-group">
+          <div class="radio-card">
+            <input type="radio" name="warna" id="bw" value="Hitam Putih"/>
+            <label class="radio-label" for="bw">
+              <span class="icon">⬛</span>Hitam Putih
+            </label>
+          </div>
+          <div class="radio-card">
+            <input type="radio" name="warna" id="color" value="Berwarna"/>
+            <label class="radio-label" for="color">
+              <span class="icon">🎨</span>Berwarna
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ukuran Kertas <span class="req">*</span></label>
+          <select id="ukuran">
+            <option value="">-- Pilih --</option>
+            <option>A4</option><option>A3</option><option>F4</option><option>Letter</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Jumlah Lembar <span class="req">*</span></label>
+          <input type="number" id="jumlah" min="1" placeholder="mis. 10"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Jenis Kertas <span class="req">*</span></label>
+        <select id="jenis_kertas">
+          <option value="">-- Pilih --</option>
+          <option>HVS 70gr</option><option>HVS 80gr</option><option>Art Paper</option><option>Ivory</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tanggal Ambil <span class="req">*</span></label>
+        <input type="date" id="tanggal_ambil"/>
+      </div>
+      <div class="form-group">
+        <label>Catatan Tambahan</label>
+        <textarea id="catatan" placeholder="Instruksi khusus, halaman tertentu, dsb..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn-prev" onclick="goPrev(2)">← Kembali</button>
+        <button class="btn-next" onclick="goNext(2)">Lanjut Upload File →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step-panel" id="step3">
+      <div class="step-title">📂 Upload File</div>
+      <div class="step-subtitle">Upload file yang ingin dicetak (opsional, maks 10 file)</div>
+      <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" style="pointer-events:all">
+          <div class="upload-icon">📁</div>
+          <h4>Drag & Drop file di sini</h4>
+          <p>atau klik untuk memilih file</p>
+          <p style="margin-top:0.4rem;font-size:0.8rem;color:rgba(255,255,255,0.35);">PDF, PNG, JPG, JPEG, DOCX • Maks 20MB/file • Maks 10 file</p>
+          <div class="upload-btn">Pilih File</div>
+        </div>
+      </div>
+      <input type="file" id="fileInput" multiple accept=".pdf,.png,.jpg,.jpeg,.docx" onchange="handleFiles(this.files)" style="display:none"/>
+      <div id="fileList" class="file-list"></div>
+      <div id="fileCount"></div>
+      <div class="btn-row" style="margin-top:1.5rem">
+        <button class="btn-prev" onclick="goPrev(3)">← Kembali</button>
+        <button class="btn-next" onclick="goNext(3)">Lanjut Konfirmasi →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-panel" id="step4">
+      <div class="step-title">✅ Konfirmasi Pesanan</div>
+      <div class="step-subtitle">Periksa kembali detail pesananmu sebelum submit</div>
+      <div class="summary-grid" id="summaryGrid"></div>
+      <div class="error-box" id="errorBox"></div>
+      <div class="btn-row">
+        <button class="btn-prev" onclick="goPrev(4)">← Kembali</button>
+        <button class="btn-next btn-submit" id="submitBtn" onclick="submitOrder()">
+          <span id="submitText">🚀 Submit Pesanan</span>
+          <div class="spinner" id="submitSpinner"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 4;
+  let uploadedFiles = [];
+
+  const stepLabels = ['Data Diri','Detail Order','Upload File','Konfirmasi'];
+
+  function updateProgress(step) {
+    const pct = ((step - 1) / (totalSteps - 1)) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+    for (let i = 1; i <= totalSteps; i++) {
+      const dot = document.getElementById('dot'+i);
+      const lbl = document.getElementById('lbl'+i);
+      dot.className = 'step-dot' + (i === step ? ' active' : i < step ? ' done' : '');
+      lbl.className = 'step-label' + (i === step ? ' active' : '');
+      dot.textContent = i < step ? '✓' : i;
+    }
+  }
+
+  function goNext(fromStep) {
+    if (!validateStep(fromStep)) return;
+    if (fromStep === 4) return;
+    if (fromStep === totalSteps - 1) buildSummary();
+    document.getElementById('step'+fromStep).classList.remove('active');
+    currentStep = fromStep + 1;
+    document.getElementById('step'+currentStep).classList.add('active');
+    updateProgress(currentStep);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function goPrev(fromStep) {
+    document.getElementById('step'+fromStep).classList.remove('active');
+    currentStep = fromStep - 1;
+    document.getElementById('step'+currentStep).classList.add('active');
+    updateProgress(currentStep);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function validateStep(step) {
+    if (step === 1) {
+      const nama = document.getElementById('nama').value.trim();
+      const kontak = document.getElementById('kontak').value.trim();
+      const email = document.getElementById('email').value.trim();
+      if (!nama) { alert('Nama wajib diisi'); return false; }
+      if (!kontak) { alert('Kontak wajib diisi'); return false; }
+      if (!email || !email.includes('@')) { alert('Email valid wajib diisi'); return false; }
+    }
+    if (step === 2) {
+      const jp = document.getElementById('jenis_print').value;
+      const warna = document.querySelector('input[name="warna"]:checked');
+      const uk = document.getElementById('ukuran').value;
+      const jk = document.getElementById('jenis_kertas').value;
+      const jml = document.getElementById('jumlah').value;
+      const tgl = document.getElementById('tanggal_ambil').value;
+      if (!jp) { alert('Pilih jenis print'); return false; }
+      if (!warna) { alert('Pilih warna'); return false; }
+      if (!uk) { alert('Pilih ukuran'); return false; }
+      if (!jk) { alert('Pilih jenis kertas'); return false; }
+      if (!jml || parseInt(jml) < 1) { alert('Masukkan jumlah yang valid'); return false; }
+      if (!tgl) { alert('Pilih tanggal ambil'); return false; }
+    }
+    return true;
+  }
+
+  // FILE HANDLING
+  function handleFiles(files) {
+    const arr = Array.from(files);
+    const MAX_FILES = 10;
+    const MAX_SIZE = 20 * 1024 * 1024;
+    const ALLOWED = ['pdf','png','jpg','jpeg','docx'];
+
+    for (const f of arr) {
+      if (uploadedFiles.length >= MAX_FILES) {
+        alert(`Maksimal ${MAX_FILES} file!`); break;
+      }
+      const ext = f.name.split('.').pop().toLowerCase();
+      if (!ALLOWED.includes(ext)) { alert(`Format ${ext} tidak diizinkan`); continue; }
+      if (f.size > MAX_SIZE) { alert(`${f.name} melebihi 20MB`); continue; }
+      uploadedFiles.push(f);
+    }
+    renderFileList();
+  }
+
+  function renderFileList() {
+    const list = document.getElementById('fileList');
+    const cnt = document.getElementById('fileCount');
+    list.innerHTML = '';
+    uploadedFiles.forEach((f, i) => {
+      const ext = f.name.split('.').pop().toLowerCase();
+      const icon = ['png','jpg','jpeg'].includes(ext) ? '🖼️' : ext === 'pdf' ? '📄' : '📝';
+      const size = f.size < 1024*1024 ? (f.size/1024).toFixed(0)+'KB' : (f.size/1024/1024).toFixed(1)+'MB';
+      const el = document.createElement('div');
+      el.className = 'file-item';
+      el.innerHTML = `<span class="file-item-icon">${icon}</span><span class="file-item-name">${f.name}</span><span class="file-item-size">${size}</span><button class="file-remove" onclick="removeFile(${i})">×</button>`;
+      list.appendChild(el);
+    });
+    if (uploadedFiles.length > 0) {
+      cnt.innerHTML = `<div class="file-count-badge">${uploadedFiles.length}/10 file dipilih</div>`;
+    } else {
+      cnt.innerHTML = '';
+    }
+  }
+
+  function removeFile(idx) {
+    uploadedFiles.splice(idx, 1);
+    renderFileList();
+  }
+
+  // DRAG & DROP
+  const dropZone = document.getElementById('dropZone');
+  function handleDragOver(e) { e.preventDefault(); dropZone.classList.add('drag-over'); }
+  function handleDragLeave(e) { dropZone.classList.remove('drag-over'); }
+  function handleDrop(e) {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  }
+  // Prevent redirect when clicking inside dropzone
+  dropZone.addEventListener('click', function(e) {
+    document.getElementById('fileInput').click();
+    e.stopPropagation();
+  });
+
+  // SUMMARY
+  function buildSummary() {
+    const warna = document.querySelector('input[name="warna"]:checked');
+    const data = [
+      ['👤 Nama', document.getElementById('nama').value],
+      ['📱 Kontak', document.getElementById('kontak').value],
+      ['📧 Email', document.getElementById('email').value],
+      ['🖨️ Jenis Print', document.getElementById('jenis_print').value],
+      ['🎨 Warna', warna ? warna.value : '-'],
+      ['📏 Ukuran', document.getElementById('ukuran').value],
+      ['📄 Jenis Kertas', document.getElementById('jenis_kertas').value],
+      ['🔢 Jumlah', document.getElementById('jumlah').value + ' lembar'],
+      ['📅 Tanggal Ambil', document.getElementById('tanggal_ambil').value],
+      ['📁 File Upload', uploadedFiles.length + ' file'],
+    ];
+    const catatan = document.getElementById('catatan').value.trim();
+    if (catatan) data.push(['📝 Catatan', catatan]);
+
+    const grid = document.getElementById('summaryGrid');
+    grid.innerHTML = data.map(([l, v]) => `
+      <div class="summary-item">
+        <div class="s-label">${l}</div>
+        <div class="s-value">${v || '-'}</div>
+      </div>`).join('');
+  }
+
+  // SUBMIT
+  async function submitOrder() {
+    const btn = document.getElementById('submitBtn');
+    const txt = document.getElementById('submitText');
+    const spin = document.getElementById('submitSpinner');
+    const errBox = document.getElementById('errorBox');
+
+    btn.disabled = true;
+    txt.style.display = 'none';
+    spin.style.display = 'block';
+    errBox.style.display = 'none';
+
+    const warna = document.querySelector('input[name="warna"]:checked');
+    const fd = new FormData();
+    fd.append('nama', document.getElementById('nama').value);
+    fd.append('kontak', document.getElementById('kontak').value);
+    fd.append('email', document.getElementById('email').value);
+    fd.append('jenis_print', document.getElementById('jenis_print').value);
+    fd.append('warna', warna ? warna.value : '');
+    fd.append('ukuran', document.getElementById('ukuran').value);
+    fd.append('jenis_kertas', document.getElementById('jenis_kertas').value);
+    fd.append('jumlah', document.getElementById('jumlah').value);
+    fd.append('tanggal_ambil', document.getElementById('tanggal_ambil').value);
+    fd.append('catatan', document.getElementById('catatan').value);
+    uploadedFiles.forEach(f => fd.append('files[]', f));
+
+    try {
+      const res = await fetch('/pesan', { method:'POST', body:fd });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem('lastOrder', JSON.stringify({
+          queueNumber: data.nomor_antrian, orderId: data.pesanan_id
+        }));
+        window.location.href = '/receipt/' + data.pesanan_id;
+      } else {
+        errBox.innerHTML = (data.errors || ['Terjadi kesalahan.']).join('<br>');
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        txt.style.display = '';
+        spin.style.display = 'none';
+      }
+    } catch(e) {
+      errBox.textContent = 'Gagal terhubung ke server. Cek koneksi internet.';
+      errBox.style.display = 'block';
+      btn.disabled = false;
+      txt.style.display = '';
+      spin.style.display = 'none';
+    }
+  }
+
+  // Set minimum date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('tanggal_ambil').setAttribute('min', today);
+
+  updateProgress(1);
+</script>
+</body>
+</html>
